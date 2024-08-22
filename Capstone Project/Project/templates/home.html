@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <style>
+       
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .logo {
+            max-width: 100px;
+            margin-right: 20px;
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #333;
+        }
+
+        .subheading {
+            font-family: 'Fantasy', sans-serif;
+            font-size: 24px;
+            color: #555;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card {
+            width: 48%;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .card-header {
+            background-color: #0e2a4c;
+            color: #fff;
+            font-size: 24px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 18px;
+            margin-bottom: 5px;
+            display: block;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            width: calc(100% - 22px); 
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            display: block;
+            background-color: #0e2a4c;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #0e2a4c;
+        }
+
+        .table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .table th {
+            background-color: #0e2a4c;
+            color: #fff;
+        }
+
+        .table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+      
+        .pdf-only {
+            display: none;
+        }
+        @media print {
+            .pdf-only {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img class="logo" src="data:image/png;base64,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" alt="Logo">
+    <div class="header-content">
+        <h1>Presidency University</h1>
+        <p class="subheading">FACE TRACKER : Facial Recognition Attendance System</p>
+    </div>
+</div>
+
+<div class="container">
+    
+    <div class="card">
+        <div class="card-header">Attendance</div>
+        <div class="card-body">
+           
+            {% if mess %}
+            <p style="color: red; text-align: center; font-size: 18px;">{{ mess }}</p>
+            {% endif %}
+            <a href="/start" style="text-decoration: none; display: block; text-align: center;">
+                <button class="btn">Take Attendance</button>
+            </a>
+            {% if l %}
+            <table id="myTable" class="table">
+                <thead>
+                    <tr>
+                        <th>S No</th>
+                        <th>Name</th>
+                        <th>ID</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                   
+                    {% for i in range(l) %}
+                    <tr>
+                        <td>{{ i+1 }}</td>
+                        <td>{{ names[i] }}</td>
+                        <td>{{ rolls[i] }}</td>
+                        <td>{{ times[i] }}</td>
+                    </tr>
+                    {% endfor %}
+                   
+                    
+                </tbody>
+            </table>
+            <button onclick="printTableToPDF()"  class="btn">Export Attendance</button>
+                {% endif %}
+                {% if l == 0 %}
+                    <p style="color: red; text-align: center; font-size: 18px; margin-top: 20px;">No attendance taken yet.</p>
+                {% endif %}
+            
+            <script>
+                function printTableToPDF() {
+                    console.log("Print Table as PDF button clicked.");
+                
+                   
+                    var table = document.getElementById('myTable');
+                
+                  
+                    if (!table) {
+                        console.error("Error: Table element not found.");
+                        return;
+                    }
+                
+                    
+                    var opt = {
+                        margin:       1,
+                        filename:     'attadence.pdf',
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2 },
+                        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    };
+                
+                    
+                    html2pdf().from(table).set(opt).save();
+                }
+            </script>
+
+        </div>
+    </div>
+
+    
+    <div class="card">
+        <div class="card-header">Add Student</div>
+        <div class="card-body">
+            <form action="/add" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="newusername">Enter Student Name</label>
+                    <input type="text" id="newusername" name="newusername" required>
+                </div>
+                <div class="form-group">
+                    <label for="newuserid">Enter Student ID</label>
+                    <input type="number" id="newuserid" name="newuserid" required>
+                </div>
+                <button type="submit" class="btn">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>
